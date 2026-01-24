@@ -7,6 +7,9 @@ void WebInit(){
     server.on("/ping", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", "BULLM-REMOTE");
     });
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/html", index_html);
+    });
     server.on("/api/info", HTTP_GET, [](AsyncWebServerRequest *request) {
         JsonDocument json;
         json["ip"] = WiFi.localIP().toString();
@@ -19,9 +22,6 @@ void WebInit(){
         serializeJson(json, jsonString);
         request->send(200, "application/json", jsonString);
         json.clear();
-    });
-    server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(200, "text/html", index_html);
     });
     // 获取wifi
     server.on("/api/wifi", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -36,7 +36,7 @@ void WebInit(){
         String data = request->getParam("data")->value();
         if (data != "") {
             OptionsSet(OPTIONS_WIFi, data.c_str());
-            request->send(200, "application/json", "success");
+            request->send(200, "application/json", "{\"code\":200}");
         } else {
             request->send(501, "text/plain", "error");
         }
@@ -66,6 +66,15 @@ void WebInit(){
         }
         json += "]";
         request->send(200, "application/json", json);
-        json = String();
+    });
+    // 重启设备
+    server.on("/api/system/restart", HTTP_GET, [](AsyncWebServerRequest *request) {
+        request->send(200, "application/json", "{\"code\":200}");
+        // 使用任务延迟重启，确保响应能够发送
+        xTaskCreate([](void *param) {
+            vTaskDelay(pdMS_TO_TICKS(500)); // 延迟500ms
+            ESP.restart();
+            vTaskDelete(NULL);
+        }, "restart_task", 2048, NULL, 1, NULL);
     });
 }
