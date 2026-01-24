@@ -22,7 +22,10 @@ extern NMWiFiUDP udp;
 extern IPAddress udp_serve_ip;
 extern int udp_serve_port;
 void UdpInit();
+void UdpLoop();
 void UdpServerAuth();
+bool UdpSend(uint8_t type, const uint8_t *data, size_t len);
+bool UdpSend(uint8_t type, const uint8_t *data, size_t len, const IPAddress& ip, uint16_t port);
 
 
 // web

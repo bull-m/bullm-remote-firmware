@@ -114,57 +114,11 @@ void setup() {
     Serial.println("\n=== 初始化完成 ===");
 }
 
-uint8_t incomingPacket[537];
-uint16_t seq = 0; // 序列号
-
 void loop() {
     ws.cleanupClients(1); // 只允许一个
     WifiCheckStatus(); // 定时检查wifi状态
     HttpLoop();
     WalkCheckTimeout();
     // HandleLoop();
-    if (udp.parsePacket()) {
-        int len = udp.read(incomingPacket, 536);
-        if (len > 0) {
-//            incomingPacket[len] = 0;
-//          for (int i = 0; i < len; i++) {
-//            Serial.print(incomingPacket[i]);
-//            Serial.print(" ");
-//          }
-//          Serial.println("");
-
-            // 验证长度
-            uint16_t data_len = (incomingPacket[len - 3] << 8) | incomingPacket[len - 2];
-            if (data_len != len - 5) {
-                return;
-            }
-
-            // 验证序列号，确保数据是按顺序到达的
-            uint16_t next_seq = (incomingPacket[len - 5] << 8) | incomingPacket[len - 4];
-            if (next_seq <= seq) { // 接受大于当前seq的序列号
-                // 允许回绕情况：当前seq接近最大值，而next_seq从0开始
-                if (!(seq >= 59900 || next_seq < 100)) {
-                    Serial.println("序列号错误");
-                    return; // 丢弃
-                }
-            }
-
-            // 校验码
-            uint8_t check = incomingPacket[len - 1];
-            // 校验码验证
-            uint8_t calcCheck = 0;
-            // 校验码校验的数据范围为0 ~ (len - 1) （即不包括校验码本身）
-            for (int i = 0; i < len - 1; i++) {
-                calcCheck += incomingPacket[i];
-            }
-            if (calcCheck != check) {
-//                Serial.println("校验码错误");
-                return;
-            }
-            // 更新序列号
-            seq = next_seq;
-            // 处理运动
-            WalkHandle(incomingPacket, data_len);
-        }
-    }
+    UdpLoop();
 }

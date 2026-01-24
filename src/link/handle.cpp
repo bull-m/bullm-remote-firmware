@@ -18,6 +18,33 @@
 
 JsonDocument doc; // 用于接收json
 
+void HandleUdpByte(uint8_t *data, size_t len) {
+    int mode = data[0];
+    if (mode == 0xF1) {
+        uint8_t *arr;
+        arr = (uint8_t *) malloc(4 + 6);
+        Serial.print("来自局域网扫描: ");
+        Serial.print(udp.remoteIP().toString());
+        Serial.print(":");
+        Serial.println(udp.remotePort());
+        // 获取ip地址
+        IPAddress ip = WiFi.localIP();
+        // 将ip地址复制到arr数组中
+        for (int i = 0; i < 4; i++) {
+            arr[i] = ip[i];
+        }
+        // 获取MAC地址
+        uint8_t mac[6];
+        WiFi.macAddress(mac);
+        for (int i = 0; i < 6; i++) {
+            arr[4 + i] = mac[i];
+        }
+        UdpSend(0xF1, arr, 10, udp.remoteIP(), udp.remotePort());
+        return;
+    };
+    HandleWsByte(data, len);
+}
+
 void HandleWsByte(uint8_t *data, size_t len) {
     int mode = data[0];
     if (mode == 0xFE) {

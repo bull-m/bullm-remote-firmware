@@ -62,7 +62,9 @@ int start() {
         Serial.printf("Camera init failed with error 0x%x", err);
         Serial.println("");
         ErrorAdd("相机启动失败: "+ String(esp_err_to_name(err)) +" code: 0x" + String(err, 16));
+        digitalWrite(PIN_CAM_ENABLE, HIGH);
         runing = false; // 取消运行
+        loaded = false;
         return err;
     }
     esp_camera_load_from_nvs("camera_settings");
@@ -83,40 +85,12 @@ void stop() {
     }
     digitalWrite(PIN_CAM_ENABLE, HIGH);
     loaded = false;
+    runing = false;
 }
 
 bool send(camera_fb_t *fb) {
     if (!runing || udp_serve_port == 0 || !fb) return false;
-    bool err = false;
-    udp.beginPacket(udp_serve_ip, udp_serve_port);
-    udp.write(0xaa);
-    udp.write(0x66);
-    udp.write(0xaa);
-    size_t len = fb->len;
-    udp.write((len >> 16) & 0xFF);
-    udp.write((len >> 8) & 0xFF);
-    udp.write(len & 0xff);
-    udp.write(0x01);    // 类型
-    uint8_t sum = 0x01; // 初始值为类型字节
-    for (size_t i = 0; i < fb->len; i++) {
-        uint8_t byte = fb->buf[i];
-        if (udp.write(byte) == 0) {
-            err = true;
-            break; // 失败了，取消后续的数据发送
-        }
-        sum = (sum + byte) & 0xff;
-    }
-    if (err) {
-        udp.stop();
-        vTaskDelay(100 / portTICK_PERIOD_MS); // 延时0.1秒
-        return false;
-    }
-    udp.write(sum); // 校验位
-    udp.write(0x66);
-    udp.write(0xaa);
-    udp.write(0x66);
-    udp.endPacket();
-    return true;
+    return UdpSend(0x01, fb->buf, fb->len);
 }
 
 

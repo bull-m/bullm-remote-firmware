@@ -11,7 +11,8 @@ String startWifiName = ""; // 首次连接的wifi名称
 uint8_t connectMultiWiFi();
 
 void WifiInit() {
-    WiFiClass::setHostname("bullm-remote");
+    String hostname = "BULLM-REMOTE-" + String(WiFi.macAddress());
+    WiFiClass::setHostname(hostname.c_str());
     WiFi.setTxPower(WIFI_POWER_19_5dBm); // 设置发射功率
     auto network_json = OptionsGetJson(OPTIONS_WIFi);
     auto network = network_json->as<JsonObject>();
