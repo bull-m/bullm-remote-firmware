@@ -1,9 +1,9 @@
 #include "link/link.h"
 #include "model/options.h"
 #include "index_html.h"
+#include <Update.h>
 
-
-void WebInit(){
+void WebInit() {
     server.on("/ping", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/plain", "BULLM-REMOTE");
     });
@@ -26,7 +26,7 @@ void WebInit(){
     // 获取wifi
     server.on("/api/wifi", HTTP_GET, [](AsyncWebServerRequest *request) {
         String data = OptionsGet(OPTIONS_WIFi);
-        if(data == ""){
+        if (data == "") {
             data = "{}";
         }
         request->send(200, "application/json", data);
@@ -43,24 +43,24 @@ void WebInit(){
     });
     //First request will return 0 results unless you start scan from somewhere else (loop/setup)
     //Do not request more often than 3-5 seconds
-    server.on("/api/scan", HTTP_GET, [](AsyncWebServerRequest *request){
+    server.on("/api/scan", HTTP_GET, [](AsyncWebServerRequest *request) {
         String json = "[";
         int n = WiFi.scanComplete();
-        if(n == -2){
+        if (n == -2) {
             WiFi.scanNetworks(true);
-        } else if(n){
-            for (int i = 0; i < n; ++i){
-                if(i) json += ",";
+        } else if (n) {
+            for (int i = 0; i < n; ++i) {
+                if (i) json += ",";
                 json += "{";
-                json += "\"rssi\":"+String(WiFi.RSSI(i));
-                json += ",\"ssid\":\""+WiFi.SSID(i)+"\"";
-                json += ",\"bssid\":\""+WiFi.BSSIDstr(i)+"\"";
-                json += ",\"channel\":"+String(WiFi.channel(i));
-                json += ",\"secure\":"+String(WiFi.encryptionType(i));
+                json += "\"rssi\":" + String(WiFi.RSSI(i));
+                json += ",\"ssid\":\"" + WiFi.SSID(i) + "\"";
+                json += ",\"bssid\":\"" + WiFi.BSSIDstr(i) + "\"";
+                json += ",\"channel\":" + String(WiFi.channel(i));
+                json += ",\"secure\":" + String(WiFi.encryptionType(i));
                 json += "}";
             }
             WiFi.scanDelete();
-            if(WiFi.scanComplete() == -2){
+            if (WiFi.scanComplete() == -2) {
                 WiFi.scanNetworks(true);
             }
         }
@@ -76,5 +76,49 @@ void WebInit(){
             ESP.restart();
             vTaskDelete(NULL);
         }, "restart_task", 2048, NULL, 1, NULL);
+    });
+
+    server.on("/api/ota", HTTP_POST, [](AsyncWebServerRequest *request) {
+        request->send(200, "text/plain", "OTA update started");
+    }, [](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
+
+        if (request->getResponse() != nullptr) {
+            // 上传已中止
+            return;
+        }
+
+        if (!index) {
+            // 开始OTA更新
+            if (!Update.begin(UPDATE_SIZE_UNKNOWN)) {
+                Update.printError(Serial);
+                return;
+            }
+        }
+
+        // 要写入一些字节？
+        if (len) {
+            if (Update.write(data, len) != len) {
+                Update.printError(Serial);
+                Update.end();
+                request->send(400, "text/plain", "更新写入失败");
+                return;
+            }
+        }
+
+        if (final) {
+            if (!Update.end(true)) {
+                Update.printError(Serial);
+                request->send(400, "text/plain", "更新失败");
+                return;
+            }
+            request->send(400, "text/plain", "OTA成功，将在2秒后重启设备");
+            Serial.println("OTA update successful");
+            // 短暂延迟后重新启动设备
+            xTaskCreate([](void *param) {
+                vTaskDelay(pdMS_TO_TICKS(2000));
+                ESP.restart();
+                vTaskDelete(NULL);
+            }, "ota_restart_task", 2048, NULL, 1, NULL);
+        }
     });
 }
