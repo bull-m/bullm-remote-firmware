@@ -17,8 +17,6 @@ void CameraStop() {
 
 int start() {
     if (loaded) return -1;
-    digitalWrite(PIN_CAM_ENABLE, LOW);
-    vTaskDelay(pdMS_TO_TICKS(50));
     camera_config_t config;
     config.ledc_channel = LEDC_CHANNEL_0;
     config.ledc_timer = LEDC_TIMER_0;
@@ -62,7 +60,9 @@ int start() {
         Serial.printf("Camera init failed with error 0x%x", err);
         Serial.println("");
         ErrorAdd("相机启动失败: "+ String(esp_err_to_name(err)) +" code: 0x" + String(err, 16));
-        digitalWrite(PIN_CAM_ENABLE, HIGH);
+        // 关闭摄像头电源
+        pinMode(PWDN_GPIO_NUM, OUTPUT);
+        digitalWrite(PWDN_GPIO_NUM, HIGH);
         runing = false; // 取消运行
         loaded = false;
         return err;
@@ -83,7 +83,9 @@ void stop() {
     } else {
         Serial.println("Camera deinit error");
     }
-    digitalWrite(PIN_CAM_ENABLE, HIGH);
+    // 关闭摄像头电源
+    pinMode(PWDN_GPIO_NUM, OUTPUT);
+    digitalWrite(PWDN_GPIO_NUM, HIGH);
     loaded = false;
     runing = false;
 }

@@ -9,7 +9,7 @@ public:
     BasicPINExtend() = default;
     virtual ~BasicPINExtend() = default;
     String id;
-    std::map<String, uint8_t> id_to_pin; // 字符串id对应实际的pin
+    std::map<String, uint8_t> id_to_pin; // 字符串id对应实际的pin // TODO 待改进
     virtual void attach() {}; // 初始化
     virtual void detach() {}; // 脱离
     virtual void reset() {}; // 重置状态

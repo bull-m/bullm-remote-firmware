@@ -60,7 +60,7 @@ uint8_t connectMultiWiFi() {
         while(pass.length() < 8){
             pass += "0"; // 补0
         }
-        String name = "NM-CAR-AP";
+        String name = "NM-CAR-" + String(WiFi.macAddress());
         Serial.print("WiFi名称：");
         Serial.println(name);
         Serial.print("WiFi密码：");
@@ -80,7 +80,7 @@ void WifiCheckStatus() {
     static ulong current_millis;
     current_millis = millis();
     if ((current_millis > timeout) || (timeout == 0)) {
-        if ((WiFiClass::status() != WL_CONNECTED)) {
+        if ((WiFiClass::status() != WL_CONNECTED) && (WiFiClass::getMode() != WIFI_AP)) {
             Serial.println("\nWiFi lost. Call connectMultiWiFi in loop");
             OledSetInfoMode(true);
             OledText("WiFi lost");

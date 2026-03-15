@@ -13,7 +13,7 @@ uint32_t uID;
 uint32_t msg_i;
 
 
-JsonDocument * AdcHandle(JsonDocument &data) {
+JsonDocument *AdcHandle(JsonDocument &data) {
     String mode = data["mode"];
     if (mode == "get") {
         uID = 1;
@@ -28,7 +28,9 @@ uint32_t adc_read_val() {
     long sum = 0;                // 采样和
     double samples = 0.0;         // 采样平均值
     for (int i = 0; i < samplingFrequency; i++) {
+#ifdef ADC_CHANNEL
         sum += adc1_get_raw(ADC_CHANNEL); // Take an ADC1 reading from a single channel.
+#endif
         // delayMicroseconds(1000);
         vTaskDelay(5 / portTICK_PERIOD_MS); // 延时1秒
     }
@@ -41,6 +43,7 @@ uint32_t adc_read_val() {
 
 // 启动adc的任务
 void AdcInit() {
+#ifdef ADC_CHANNEL
     adc1_config_width(
             ADC_WIDTH_BIT);                     // Configure ADC1 capture width, meanwhile enable output invert for ADC1. The configuration is for all channels of ADC1.
     adc1_config_channel_atten(ADC_CHANNEL, ADC_ATTEN_DB); // Configure the ADC2 channel, including setting attenuation.
@@ -63,10 +66,10 @@ void AdcInit() {
         while (true) {
             if (uID != -1) {
                 // /*通过R1&R2推算电池电压*/
-                double battery_voltage = (ADC_R2 + ADC_R1) / ((double)ADC_R2) * adc_read_val() + ADC_OFFSET;
+                double battery_voltage = (ADC_R2 + ADC_R1) / ((double) ADC_R2) * adc_read_val() + ADC_OFFSET;
                 /*adc端电压*/
 //                double adc_voltage = (double) adc_read_val() / 1000.0f;
-                if(uID != -1){
+                if (uID != -1) {
                     WsAutoSend("{\"i\":" + String(msg_i) + ", \"voltage\":" + battery_voltage + "}");
                     uID = -1;
                 }
@@ -74,4 +77,5 @@ void AdcInit() {
             vTaskDelay(50 / portTICK_PERIOD_MS); // 延时
         }
     }, "TaskAdc", 2048, NULL, 1, NULL, 0);
+#endif
 }

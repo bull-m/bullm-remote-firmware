@@ -33,7 +33,7 @@ JsonDocument *I2cHandle(JsonDocument &data) {
 }
 
 void I2cInit() {
-    Wire.begin(SDA, SCL, 100000UL); // ,100000
+    Wire.begin(PIN_SDA, PIN_SCL, 100000UL); // ,100000
 
 //    // if you want to really speed stuff up, you can go into 'fast 400khz I2C' mode
 //    // some i2c devices dont like this so much so if you're sharing the bus, watch

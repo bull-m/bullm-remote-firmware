@@ -17,7 +17,7 @@
 #define PIN_VOLTAGE_IN  9
 
 
-#define ADC_CHANNEL     ADC1_CHANNEL_8
+//#define ADC_CHANNEL     ADC1_CHANNEL_8
 #define ADC_ATTEN_DB    ADC_ATTEN_DB_2_5
 #define ADC_WIDTH_BIT   ADC_WIDTH_BIT_12
 #define ADC_NUM         ADC_UNIT_1      // ADC to characterize (ADC_UNIT_1 or ADC_UNIT_2)

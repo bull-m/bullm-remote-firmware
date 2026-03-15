@@ -19,6 +19,7 @@
 
 
 void reset() {
+#ifdef PIN_RESET
     // 重置逻辑
     //将引脚1设置为输入上拉模式
     pinMode(PIN_RESET, INPUT_PULLUP);
@@ -47,33 +48,39 @@ void reset() {
         digitalWrite(PIN_TIP_LED, i % 2);
         i++;
     }
+#endif
 }
 
 void setup() {
     Serial.begin(115200);
     Serial.setDebugOutput(true);
     // 指示灯
+#ifdef PIN_TIP_LED
     pinMode(PIN_TIP_LED, OUTPUT);
     digitalWrite(PIN_TIP_LED, HIGH);
+#endif
     // 电机驱动
+#ifdef PIN_MOTOR_ENABLE
     pinMode(PIN_MOTOR_ENABLE, OUTPUT);
     digitalWrite(PIN_MOTOR_ENABLE, LOW);
-    // CAM_3V3
+#endif
+    // CAM_3V3 新版硬件都没有这个，使用PWDN引脚关闭摄像头电源
+#ifdef PIN_CAM_ENABLE
     pinMode(PIN_CAM_ENABLE, OUTPUT);
-    digitalWrite(PIN_CAM_ENABLE, HIGH);
+    digitalWrite(PIN_CAM_ENABLE, LOW);
+#endif
 
     esp_err_t ret;
 
     ret = nvs_flash_init(); /* 初始化NVS */
-    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND)
-    {
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
         ESP_ERROR_CHECK(nvs_flash_erase());
         ESP_ERROR_CHECK(nvs_flash_init());
     }
 
     I2cInit(); // 初始化i2c
     OledInit(); // 初始化oled
-    RgbInit(); // 初始化rgb
+//    RgbInit(); // 初始化rgb
     OledText("-> start");
 
     reset(); // 复位逻辑

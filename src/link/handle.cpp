@@ -94,7 +94,9 @@ void HandleWsText(uint8_t *data, size_t len) {
 // 断开处理
 void HandleDisconnect() {
     digitalWrite(PIN_TIP_LED, LOW); // 指示灯
+#ifdef PIN_MOTOR_ENABLE
     digitalWrite(PIN_MOTOR_ENABLE, LOW); // 禁用电机
+#endif
     WalkReset();
     CameraStop();
 }
@@ -102,6 +104,8 @@ void HandleDisconnect() {
 void HandleConnect() {
     WalkReset(); // 重置运动状态
     digitalWrite(PIN_TIP_LED, HIGH); // 指示灯
+#ifdef PIN_MOTOR_ENABLE
     digitalWrite(PIN_MOTOR_ENABLE, HIGH); // 启用电机
+#endif
     ErrorSendToClient(); // 发送累计的错误信息
 }
