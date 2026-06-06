@@ -1,6 +1,7 @@
 // 管理一些配置
 #include "model/options.h"
 #include "walk/walk.h"
+#include "sensor/sensor.h"
 #include <model/oled.h>
 #include <main.h>
 #include <memory>
@@ -40,6 +41,9 @@ void update(const char *key){
     }
     if(String(key) == OPTIONS_SCREEN){
         OledReset();
+    }
+    if(String(key) == OPTIONS_SENSORS){
+        SensorInit();
     }
 }
 
@@ -99,9 +103,9 @@ String OptionsGet(const char *key) {
         if(String(key) == OPTIONS_SCREEN){
             return OPTIONS_SCREEN_DEF;
         }
-        // 自带的电池配置
-        if(String(key) == OPTIONS_BATTERY){
-            return OPTIONS_BATTERY_DEF;
+        // 自带的传感器配置
+        if(String(key) == OPTIONS_SENSORS){
+            return OPTIONS_SENSORS_DEF;
         }
         return "";
     }

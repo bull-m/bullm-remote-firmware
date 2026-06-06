@@ -34,8 +34,12 @@ int start() {
     config.pin_href = HREF_GPIO_NUM;
     config.pin_sccb_sda = SIOD_GPIO_NUM;
     config.pin_sccb_scl = SIOC_GPIO_NUM;
+#ifdef PWDN_GPIO_NUM
     config.pin_pwdn = PWDN_GPIO_NUM;
+#endif
+#ifdef RESET_GPIO_NUM
     config.pin_reset = RESET_GPIO_NUM;
+#endif
     config.xclk_freq_hz = 20000000;
     config.frame_size = FRAMESIZE_SVGA;
     config.pixel_format = PIXFORMAT_JPEG;
@@ -60,9 +64,11 @@ int start() {
         Serial.printf("Camera init failed with error 0x%x", err);
         Serial.println("");
         ErrorAdd("相机启动失败: "+ String(esp_err_to_name(err)) +" code: 0x" + String(err, 16));
+#ifdef PWDN_GPIO_NUM
         // 关闭摄像头电源
         pinMode(PWDN_GPIO_NUM, OUTPUT);
         digitalWrite(PWDN_GPIO_NUM, HIGH);
+#endif
         runing = false; // 取消运行
         loaded = false;
         return err;
@@ -83,9 +89,11 @@ void stop() {
     } else {
         Serial.println("Camera deinit error");
     }
+#ifdef PWDN_GPIO_NUM
     // 关闭摄像头电源
     pinMode(PWDN_GPIO_NUM, OUTPUT);
     digitalWrite(PWDN_GPIO_NUM, HIGH);
+#endif
     loaded = false;
     runing = false;
 }

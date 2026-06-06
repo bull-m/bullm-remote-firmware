@@ -13,7 +13,7 @@
 #define OPTIONS_WIFi "wifi"
 #define OPTIONS_TOKEN "token"
 #define OPTIONS_NETWORK "network"
-#define OPTIONS_BATTERY "battery"
+#define OPTIONS_SENSORS "sensors"
 
 
 //#define OPTIONS_REPLACE {"\"builtIn\"", "\"name\"", "\"type\"","\"address\"", "\"pin\"", "\"hz\"", "\"def\""}

@@ -1,7 +1,5 @@
-#include <AsyncWebSocket.h>
 #include <ArduinoJson.h>
 #include <map>
-#include <ESP32Servo.h>
 #include "walk/basic/BasicPINExtend.h"
 #include "model/options.h"
 #include "walk/basic/BasicOutput.h"

@@ -69,5 +69,7 @@
 #define OPTIONS_CHASSIS_DEF "{\"mode\":\"tank\",\"motor\":{\"top-left\":\"g:A-0\",\"top-right\":\"g:A-1\",\"bottom-left\":\"g:A-2\",\"bottom-right\":\"g:A-3\"}}"
 // 默认的屏幕配置
 #define OPTIONS_SCREEN_DEF "{\"enable\":true,\"address\":\"60\",\"module\":[{\"type\":0,\"prefix\":\"wifi:\"},{\"type\":2,\"prefix\":\"ip: \"},{\"type\":1,\"prefix\":\"rssi: \"}]}"
-// 默认的电池配置
-#define OPTIONS_BATTERY_DEF "{\"offset\":0}"
+
+
+// 默认的传感器配置
+#define OPTIONS_SENSORS_DEF "[{\"id\":\"power\",\"name\":\"电源\",\"type\":\"board-adc\",\"pin\":9,\"u_t\":10000}]"

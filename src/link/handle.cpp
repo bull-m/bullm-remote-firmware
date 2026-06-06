@@ -4,7 +4,6 @@
 #include "AsyncWebSocket.h"
 #include <Preferences.h>
 #include "link/handle.h"
-#include "model/adc.h"
 #include "model/rgb.h"
 #include "model/camera.h"
 #include "model/options.h"
@@ -15,6 +14,7 @@
 #include "link/link.h"
 #include "main.h"
 #include "model/error.h"
+#include "sensor/sensor.h"
 
 JsonDocument doc; // 用于接收json
 
@@ -65,10 +65,10 @@ void HandleWsText(uint8_t *data, size_t len) {
 //    Serial.println((char *) data);
     String type = doc["type"];
     JsonDocument *req = nullptr;
-    if (type == "rgb") // rgb
+    if (type == "sensor")
+        req = SensorHandle(doc);
+    else if (type == "rgb") // rgb
         req = RgbHandle(doc);
-    else if (type == "adc") // adc
-        req = AdcHandle(doc);
     else if (type == "options") // 配置
         req = OptionsHandle(doc);
     else if (type == "camera") // 相机
@@ -79,7 +79,7 @@ void HandleWsText(uint8_t *data, size_t len) {
         req = WalkHandle(doc);
     else if (type == "i2c") // i2c
         req = I2cHandle(doc);
-    else if (type == "info") // i2c
+    else if (type == "info") // 信息
         req = InfoHandle(doc);
     if (req != nullptr) {
         auto &json = *req;

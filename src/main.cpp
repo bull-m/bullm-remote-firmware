@@ -8,10 +8,10 @@
 #include "main.h"
 #include <esp_system.h>
 #include <nvs_flash.h>
-#include "model/adc.h"
 #include "model/rgb.h"
 #include "model/camera.h"
 #include "walk/walk.h"
+#include "sensor/sensor.h"
 #include "model/oled.h"
 #include "model/i2c.h"
 #include "model/wifi.h"
@@ -101,10 +101,10 @@ void setup() {
     HttpInit();
     // 启动相机任务
     CameraInit();
-    // 初始化adc任务
-    AdcInit();
     // 初始化运动
     WalkInit();
+    // 初始化传感器
+    SensorInit();
 
     // 关闭指示灯
     digitalWrite(PIN_TIP_LED, LOW);
