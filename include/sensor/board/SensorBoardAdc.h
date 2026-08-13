@@ -3,6 +3,13 @@
 
 #include "sensor/basic/BasicSensor.h"
 
+#define ADC_ATTENUATION ADC_2_5db  // 设置 ADC 衰减，适用于 0 - 3.3V 的输入范围
+#define ADC_RESOLUTION 12         // 设置 ADC 分辨率，ESP32-C3 支持最高 12 位
+
+#define ADC_R1          100
+#define ADC_R2          10
+#define ADC_OFFSET      0 // adb偏移
+
 class SensorBoardAdc : public BasicSensor {
 public:
     explicit SensorBoardAdc(uint8_t adc_pin);
