@@ -79,27 +79,29 @@ void WebInit() {
     });
 
     server.on("/api/ota", HTTP_POST, [](AsyncWebServerRequest *request) {
-        request->send(200, "text/plain", "OTA update started");
+      if (request->getResponse()) {
+        return;
+      }
+      // 未上传任何内容 ?
+      if (!request->_tempObject) {
+        return request->send(400, "text/plain", "未上传任何内容");
+      }
+      request->send(200, "text/plain", "OK");
     }, [](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {
-
-        if (request->getResponse() != nullptr) {
-            // 上传已中止
-            return;
-        }
-
+        Serial.printf("Upload[%s]: start=%u, len=%u, final=%d\n", filename.c_str(), index, len, final);
         if (!index) {
-            // 开始OTA更新
+            Serial.println("OTA update started, file: " + filename);
             if (!Update.begin(UPDATE_SIZE_UNKNOWN)) {
                 Update.printError(Serial);
+                request->send(500, "text/plain", "OTA初始化失败");
                 return;
             }
         }
 
-        // 要写入一些字节？
         if (len) {
             if (Update.write(data, len) != len) {
                 Update.printError(Serial);
-                Update.end();
+                Update.end(false);
                 request->send(400, "text/plain", "更新写入失败");
                 return;
             }
@@ -111,9 +113,8 @@ void WebInit() {
                 request->send(400, "text/plain", "更新失败");
                 return;
             }
-            request->send(400, "text/plain", "OTA成功，将在2秒后重启设备");
+            request->send(200, "text/plain", "OTA成功，即将重启设备");
             Serial.println("OTA update successful");
-            // 短暂延迟后重新启动设备
             xTaskCreate([](void *param) {
                 vTaskDelay(pdMS_TO_TICKS(2000));
                 ESP.restart();
