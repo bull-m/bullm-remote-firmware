@@ -3,6 +3,7 @@
 #include "model/wifi.h"
 #include "model/oled.h"
 #include <WiFiMulti.h>
+#include <ESPmDNS.h>
 
 WiFiMulti wifiMulti;
 
@@ -29,6 +30,13 @@ void WifiInit() {
     if(WiFiClass::getMode() != WIFI_AP){
         startWifiName = WiFi.SSID();
     }
+    // 2. 启动mDNS服务，设置主机名为 "bullm-remote"
+    if (!MDNS.begin("bullm-remote")) {
+        Serial.println("启动mDNS失败!");
+        return;
+    }
+    Serial.println("mDNS服务已启动，访问地址: http://bullm-remote.local");
+    MDNS.addService("http", "tcp", 80);
 }
 
 uint8_t connectMultiWiFi() {
