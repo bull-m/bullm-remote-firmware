@@ -64,11 +64,11 @@ uint8_t connectMultiWiFi() {
         Serial.println("WiFi连接失败，启动 AP 模式");
         WiFiClass::mode(WIFI_AP);
         String token = OptionsGet(OPTIONS_TOKEN); // 获取存储的token
-        String pass = token == "" ? "bullm1211" : token;
+        String pass = token == "" ? "11221111" : token;
         while(pass.length() < 8){
             pass += "0"; // 补0
         }
-        String name = "NM-CAR-" + String(WiFi.macAddress());
+        String name = "BULLM-REMOTE-" + String(WiFi.macAddress());
         Serial.print("WiFi名称：");
         Serial.println(name);
         Serial.print("WiFi密码：");

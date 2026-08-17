@@ -5,7 +5,14 @@
 
 void WebInit() {
     server.on("/ping", HTTP_GET, [](AsyncWebServerRequest *request) {
-        request->send(200, "text/plain", "BULLM-REMOTE");
+        JsonDocument json;
+        json["ip"] = WiFi.localIP().toString();
+        json["mac"] = WiFi.macAddress();
+        json["type"] = INFO_TYPE;
+        String jsonString = "";
+        serializeJson(json, jsonString);
+        request->send(200, "application/json", jsonString);
+        json.clear();
     });
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         request->send(200, "text/html", index_html);
